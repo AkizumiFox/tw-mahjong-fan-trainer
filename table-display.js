@@ -39,7 +39,7 @@ export function displayTableSituation(situation) {
         <div class="table-position position-${pos}">
             <div class="position-indicators">
                 ${positionText}
-                ${situation.flowerPlacement === pos ? '<div class="flower-indicator">花</div>' : ''}
+                ${situation.flowerPlacement === pos ? '<div class="flower-indicator">門</div>' : ''}
             </div>
             ${situation.dealer === pos ? `
                 <div style="display: flex; align-items: center; gap: 5px;">
