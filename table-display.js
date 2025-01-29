@@ -2,6 +2,26 @@ import { createDiceDots } from './tile-display.js';
 import { updateDebugInfo } from './hand-display.js';
 
 /**
+ * Checks if an array of tiles forms a kong (four identical tiles)
+ * @param {Array} tiles Array of tile objects to check
+ * @returns {boolean} True if the tiles form a kong, false otherwise
+ */
+export function isKong(tiles) {
+    // Check if we have exactly 4 tiles
+    if (!tiles || tiles.length !== 4) return false;
+    
+    // Get the first tile's type and number
+    const firstTile = tiles[0];
+    if (!firstTile || !firstTile.type || !firstTile.number) return false;
+    
+    // Check if all tiles are identical
+    return tiles.every(tile => 
+        tile.type === firstTile.type && 
+        tile.number === firstTile.number
+    );
+}
+
+/**
  * Displays the table situation on the webpage
  * @param {Object} situation The table situation data to display
  */

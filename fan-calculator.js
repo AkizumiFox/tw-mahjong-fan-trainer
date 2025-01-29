@@ -779,29 +779,27 @@ function checkAllPungsFan(tableSituation, hand) {
     
     // Check if in-hand tiles can be arranged into all pungs except one pair
     const tileCount = getTileCount(hand);
-    let pairFound = false;
-    let pungCount = 0;
+
+    let count = new Array(5).fill(0);
     
+    // First find the pair
     for (let i = 0; i < 34; i++) {
-        if (tileCount[i] >= 3) {
-            pungCount++;
-            tileCount[i] -= 3;
-            i--; // Check same tile again for possible additional pung
-        } else if (tileCount[i] === 2 && !pairFound) {
-            pairFound = true;
-            tileCount[i] = 0;
-        }
+        count[tileCount[i]]++;
     }
-    
-    // All tiles should be used (no leftover tiles)
-    const allTilesUsed = tileCount.every(count => count === 0);
-    const correctStructure = pairFound && allTilesUsed;
-    
-    return {
-        achieved: correctStructure,
-        fan: 4,
-        name: "碰碰胡"
-    };
+
+    if(count[2] > 1 || count[1] > 0) {
+        return {
+            achieved: false,
+            fan: 4,
+            name: "碰碰胡"
+        };
+    } else {
+        return {
+            achieved: true,
+            fan: 4,
+            name: "碰碰胡"
+        };
+    }
 }
 
 /**
