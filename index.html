@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Trainer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>麻將算台訓練器</h1>
+    
+    <div class="controls">
+        <div class="controls-left">
+            <button id="startBtn" class="start-btn" onclick="startGame()">開始</button>
+        </div>
+        <div class="controls-right">
+            <button class="skip-btn" onclick="skipQuestion()">跳過</button>
+            <button class="toggle-quiz-btn" onclick="toggleQuizMode()">顯示答案模式</button>
+            <button class="open-modal-btn" onclick="openModal()">設定</button>
+        </div>
+    </div>
+    
+    <div class="game-container">
+        <div class="table-info" id="tableInfo">
+            <!-- Table situation will be displayed here -->
+        </div>
+        
+        <div class="game-area">
+            <!-- Front Row -->
+            <div class="row">
+                <div class="section flowers" id="flowersDisplay">
+                    <!-- Flowers will be displayed here -->
+                </div>
+                <div class="section revealed-melds" id="revealedDisplay">
+                    <!-- Revealed melds will be displayed here -->
+                </div>
+            </div>
+            
+            <!-- Separator Line -->
+            <div class="row-separator"></div>
+            
+            <!-- Back Row -->
+            <div class="row">
+                <div class="section" id="inHandDisplay">
+                    <!-- In-hand tiles will be displayed here -->
+                </div>
+                <div class="winning-section">
+                    <div class="win-type" id="winTypeDisplay"></div>
+                    <div class="section" id="winningTileDisplay">
+                        <!-- Winning tile will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fan-display">
+        <h2>台數計算</h2>
+        <div id="fanList">
+            <!-- Regular fan list will be displayed here -->
+        </div>
+        <div id="totalFan"></div>
+        
+        <!-- New sections for self-draw cases -->
+        <div id="selfDrawFans" style="display: none;">
+            <div class="self-draw-fans-container">
+                <div class="dealer-fans">
+                    <h3>莊家應付台數</h3>
+                    <div id="dealerFanList"></div>
+                    <div id="dealerTotalFan"></div>
+                </div>
+                <div class="non-dealer-fans">
+                    <h3>閒家應付台數</h3>
+                    <div id="nonDealerFanList"></div>
+                    <div id="nonDealerTotalFan"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="quiz-mode" id="quizMode">
+        <div class="quiz-score">
+            <div>正確: <span id="correctCount">0</span></div>
+            <div>錯誤: <span id="incorrectCount">0</span></div>
+        </div>
+        <div class="quiz-input">
+            <div id="singleFanInput" class="input-group">
+                <label for="fanGuess">總共</label>
+                <input type="number" id="fanGuess" min="0" max="100">
+                <label for="fanGuess">台</label>
+            </div>
+            <div id="dualFanInput" class="input-group" style="display: none;">
+                <div class="dual-input">
+                    <label for="fanGuessDealer">莊家</label>
+                    <input type="number" id="fanGuessDealer" min="0" max="100">
+                    <label for="fanGuessDealer">台</label>
+                </div>
+                <div class="dual-input">
+                    <label for="fanGuessNonDealer">閒家</label>
+                    <input type="number" id="fanGuessNonDealer" min="0" max="100">
+                    <label for="fanGuessNonDealer">台</label>
+                </div>
+            </div>
+            <button id="submitGuess">提交答案</button>
+            <button id="nextQuestionBtn" style="display: none;">下一題</button>
+        </div>
+        <div id="quizFeedback" class="quiz-feedback"></div>
+        <div id="quizAnswer" class="quiz-answer">
+            <h3>正確答案：</h3>
+            <div id="quizFanList"></div>
+            <div id="quizTotalFan"></div>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Debug Info:</h2>
+        <div id="debugOutput"></div>
+    </div>
+
+    <!-- Add modal structure -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div id="myModal" class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">設定</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="introduction">介紹</div>
+                <div class="tab" data-tab="parameters">參數設定</div>
+                <div class="tab" data-tab="information">資訊</div>
+            </div>
+
+            <div id="introduction" class="tab-content active">
+                <h3 class="first-header">測驗模式使用方法</h3>
+                <ol>
+                    <li>在測驗模式下，系統會隱藏台數計算結果，請觀察牌型後，在輸入框中輸入你計算的台數。</li>
+                    <li>點擊提交答案，系統會顯示正確答案和詳細計算。</li>
+                    <li>可以使用參數設定來調整生成牌型的機率。</li>
+                </ol>
+                <br>
+
+                <h3>未盡事項</h3>
+                <ol>
+                    <li>有些牌型因為技術問題而無法實現。其中有河底撈魚、海底撈月、天聽、地聽（或MIGI）、八仙過海、天胡、地胡、人胡。</li>
+                    <li>在極端狀況下有可能會有錯誤答案。如 223334445萬 23334條，會被同時計算三暗刻和平胡。我目前還沒有想到解決辦法。如果你有意願重構程式的話，歡迎來我的 GitHub 發 PR。</li>
+                </ol>
+                <br>
+
+                <h3>算台規則</h3>
+                <ol>
+                    <li>小四喜/大四喜則不另計風牌。</li>
+                    <li>小三元/大三元則不另計三元牌。</li>
+                    <li>花槓不另計花牌。</li>
+                    <li>五暗刻與碰碰胡可以同時計算。</li>
+                </ol>
+                <br>
+            </div>
+
+            <div id="parameters" class="tab-content">
+                <div class="input-group">
+                    <label for="numPairs">對子數量：</label>
+                    <input type="number" id="numPairs" value="1" min="1" max="7">
+                </div>
+                <div class="input-group">
+                    <label for="numMelds">順子/刻子數量：</label>
+                    <input type="number" id="numMelds" value="5" min="0" max="7">
+                </div>
+                <div class="input-group">
+                    <label for="probReveal">明牌機率：</label>
+                    <input type="number" id="probReveal" value="70" min="0" max="100">%
+                </div>
+                <div class="input-group">
+                    <label for="probKang">槓子機率：</label>
+                    <input type="number" id="probKang" value="30" min="0" max="100">%
+                </div>
+                <div class="input-group">
+                    <label for="probFlower">花牌機率：</label>
+                    <input type="number" id="probFlower" value="50" min="0" max="100">%
+                </div>
+                <div class="input-group">
+                    <label for="probSelfDraw">自摸機率：</label>
+                    <input type="number" id="probSelfDraw" value="30" min="0" max="100">%
+                </div>
+                <div class="input-group">
+                    <label for="probRobKang">搶槓機率：</label>
+                    <input type="number" id="probRobKang" value="50" min="0" max="100">%
+                </div>
+                <div class="input-group">
+                    <label for="probKongDraw">槓上開花機率：</label>
+                    <input type="number" id="probKongDraw" value="10" min="0" max="100">%
+                </div>
+            </div>
+
+            <div id="information" class="tab-content">
+                <div class="about-content">
+                    <p class="about-text">
+                        Make with paws 🐾 by Akizumi 🦊
+                    </p>
+                    <div class="about-links">
+                        <a href="https://github.com/AkizumiFox" class="about-link" target="_blank">
+                            <i class="fab fa-github"></i> GitHub
+                        </a>
+                        <a href="https://aaronlin1229.github.io/" class="about-link" target="_blank">
+                            <i class="fas fa-globe"></i> Personal Website
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+                <button class="btn btn-save" onclick="saveSettings()">儲存</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
+
