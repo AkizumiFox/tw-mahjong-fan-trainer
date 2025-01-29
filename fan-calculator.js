@@ -492,29 +492,6 @@ function checkSingleWaitFan(tableSituation, hand) {
 }
 
 /**
- * Checks if the hand qualifies for half-qiu
- * @param {Object} tableSituation The current table situation
- * @param {Object} hand The winning hand
- * @returns {{
- *   achieved: boolean,
- *   fan: number,
- *   name: string
- * }} Fan check result
- */
-function checkHalfQiuFan(tableSituation, hand) {
-    // This needs to check if all melds are revealed except for a single tile
-    // and if the win was by self-draw
-    const isHalfQiu = hand.inHand.length === 1 &&
-                     (hand.win_type === "self_draw" || hand.win_type === "kong_draw");
-    
-    return {
-        achieved: isHalfQiu,
-        fan: 1,
-        name: "半求"
-    };
-}
-
-/**
  * Checks if the win was by kong-draw
  * @param {Object} tableSituation The current table situation
  * @param {Object} hand The winning hand
@@ -1164,7 +1141,6 @@ const fanCheckMap = {
     checkGreenDragonFan,
     checkWhiteDragonFan,
     checkSingleWaitFan,
-    checkHalfQiuFan,
     checkKongDrawFan,
     checkPinfuFan,
     checkFullQiuFan,
@@ -1201,7 +1177,6 @@ function checkAllFans(hand, tableSituation) {
         'checkGreenDragonFan',
         'checkWhiteDragonFan',
         'checkSingleWaitFan',
-        'checkHalfQiuFan',
         'checkKongDrawFan',
         'checkPinfuFan',
         'checkFullQiuFan',
@@ -1231,6 +1206,7 @@ function checkAllFans(hand, tableSituation) {
     let hasBigFourWinds = false;
     let hasCompleteSeasonSet = false;
     let hasCompletePlantSet = false;
+    let hasFullQiu = false;
 
     for (const checkName of fanOrder) {
         const checkFn = fanCheckMap[checkName];
@@ -1285,6 +1261,11 @@ function checkAllFans(hand, tableSituation) {
                                     tableSituation.flowerPlacement === "opp" ? 3 : 4;
                     excludedFans.add(`花牌（${seatNumber}花）`);
                 }
+                else if (checkName === 'checkFullQiuFan') {
+                    hasFullQiu = true;
+                    // If has Full Qiu, exclude Single Wait
+                    excludedFans.add('獨聽');
+                }
 
                 // Add any explicit exclusions from the fan result
                 if (result.excludes) {
@@ -1322,7 +1303,6 @@ const nonDealerFanCheckMap = {
     checkGreenDragonFan,
     checkWhiteDragonFan,
     checkSingleWaitFan,
-    checkHalfQiuFan,
     checkKongDrawFan,
     checkPinfuFan,
     checkFullQiuFan,
@@ -1359,7 +1339,6 @@ function checkNonDealerAllFans(hand, tableSituation) {
         'checkGreenDragonFan',
         'checkWhiteDragonFan',
         'checkSingleWaitFan',
-        'checkHalfQiuFan',
         'checkKongDrawFan',
         'checkPinfuFan',
         'checkFullQiuFan',
@@ -1389,6 +1368,7 @@ function checkNonDealerAllFans(hand, tableSituation) {
     let hasBigFourWinds = false;
     let hasCompleteSeasonSet = false;
     let hasCompletePlantSet = false;
+    let hasFullQiu = false;
 
     for (const checkName of fanOrder) {
         const checkFn = nonDealerFanCheckMap[checkName];
@@ -1442,6 +1422,11 @@ function checkNonDealerAllFans(hand, tableSituation) {
                                     tableSituation.flowerPlacement === "prev" ? 2 : 
                                     tableSituation.flowerPlacement === "opp" ? 3 : 4;
                     excludedFans.add(`花牌（${seatNumber}花）`);
+                }
+                else if (checkName === 'checkFullQiuFan') {
+                    hasFullQiu = true;
+                    // If has Full Qiu, exclude Single Wait
+                    excludedFans.add('獨聽');
                 }
 
                 // Add any explicit exclusions from the fan result
@@ -1484,7 +1469,6 @@ export {
     checkGreenDragonFan,
     checkWhiteDragonFan,
     checkSingleWaitFan,
-    checkHalfQiuFan,
     checkKongDrawFan,
     checkPinfuFan,
     checkFullQiuFan,
